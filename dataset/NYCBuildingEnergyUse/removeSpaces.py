@@ -1,5 +1,4 @@
-with open("./nyc_benchmarking_disclosure_data_reported_in_2016.csv") as f:
+with open("../NYC_tract_income/ACSDT5Y2015.B19001-Data.csv") as f:
     s = f.read().splitlines()
+    print(s[0])
 
-    for i in range(100):
-        print((s[i].count(",")))
