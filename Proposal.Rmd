@@ -1,0 +1,45 @@
+---
+title: "Make NYC A 2000-Watt Society"
+subtitle: "19-603 Project Proposal:"
+author: "Xinye Wang, Yiyang Cheng, Zhenhao An, Hanlu Xu"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(knitr)
+opts_chunk$set(echo = FALSE,
+               out.width = "75%", 
+               fig.align = "center")
+```
+
+## 1. Research Questions
+
+The problem of environmental protection and energy consumption is gaining importance nowadays.
+
+One promising vision of sustainable cities is the 2000-watt society. It was developed out of a large body of research at the ETH in Switzerland examining any and all metrics for the quality of life across the globe and what energy levels they correspond with. The research showed quality of life increases exponentially, until about 2,000 watts per person per day. And then, no matter how profligate a lifestyle becomes, the metrics that gauge quality of life do not change. <https://www.2000-watt-society.org/>
+
+We hope to help large cities with relatively high energy usage, NYC as an example, to achieve the target of no more than 2,000 watts per resident by the year 2050. Besides direct correlations like the distribution of industries and infrastructures, we also need to put some efforts in exploring potential, more invisible factors that will contribute to the ultimate goal.
+
+<center>
+
+![img1](./images/2000WattInLife.png){width=50%}
+
+</center>
+
+The graph above shows us the constitutions of power consumption in global major regions. Apart from the explicit parts like electricity and public infrastructure, there are actually many "invisible" factors that increase the energy usage, like living & office and food & consumer items. To explore the impact of these invisible factors, we will have to dig deeper into the sub-factors like demographic features and economic structures, and fit possible models to check how power consumption levels are influenced by such data. 
+
+Our research question is: what are the social, demographically, and economic factors that will contribute to or obstruct the realization of the 2000-watt society vision in NYC?
+
+## 2. Data Sources
+Our GitHub Repo for data and code: <https://github.com/Ritsuko-xu/19433-2000wattCommunity/>
+You can browse our dataset csv files and data source citations under "dataset" subfolder.
+
+Our current datasets of power consumption of NYC are majorly from Kaggle. We cited the project source and original data source to make our work more transparent.
+
+The economic, demographic and social dataset will be from Census Bureau <https://data.census.gov/advanced>. This is one of the best data source for such analysis related to society and population.
+
+## 3. Research approach
+
+We will try to achieve a common pattern of energy consumption with data from various communities in NYC, by 1) joining regional energy consumption characteristics with per capita income, industrial structure and so on, and 2) fitting possible models like k-means or regression to identify potential barriers and opportunities for reducing power consumption. Our expected social, demographically, and economic factors include race, average age and average hosehold income. We hope to provide valuable insights for policymakers, urban planners, and communities to reduce energy consumption and promote sustainable development.
