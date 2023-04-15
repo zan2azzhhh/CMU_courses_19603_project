@@ -36,11 +36,13 @@ You can browse our dataset files and data source citations under "dataset" subfo
 ```{r}
 # set correct working directory
 setwd("D:/OneDrive/education/S23_CMU/19-603_Data_Science_for_Technology_Innovation_and_Policy/19433-2000wattCommunity")
+library("tidyverse")
 ```
 
 ```{r}
 # load benchmarking table
-BR <- read.table(file = paste0(getwd(),"/dataset/NYCBuildingEnergyUse/nyc_benchmarking_disclosure_data_reported_in_2016.csv"))
+BR <- read.csv(file = paste0(getwd(),"/dataset/NYCBuildingEnergyUse/nyc_benchmarking_disclosure_data_reported_in_2016.csv"),
+                 header=TRUE)
 
 BR
 
