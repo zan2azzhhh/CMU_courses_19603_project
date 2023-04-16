@@ -20,14 +20,37 @@ setwd("/Users/zhenhaoan/Desktop/DS project/CMU_courses_19603_project")
 
 ```{r zip_code}
 zip <- read_csv(paste0(getwd(),"/dataset/ZIP_to_tract/ZIP_TRACT.csv"))
-acds <- read_csv(paste0(getwd(),"/dataset/NYC_tract_income/ACSDT5Y2015.B19001-Data.csv"))
+acsd <- read_csv(paste0(getwd(),"/dataset/NYC_tract_income/ACSDT5Y2015.B19001-Data.csv"))
+nyc <- read_csv(paste0(getwd(),"/dataset/NYCBuildingEnergyUse/nyc_benchmarking_disclosure_data_reported_in_2016.csv"))
 zip
-acds
+acsd
+nyc
 ```
 ```{r zip_code}
-zip <- read_csv("/Users/zhenhaoan/Desktop/DS project/CMU_courses_19603_project/dataset/ZIP_to_tract/ZIP_TRACT.csv"))
-##acds <- read_csv()
+#change the column
+library(dplyr)
+
+acsd_zip <- acsd %>%
+  select(GEO_ID) %>%
+  mutate(zip_id = substr(GEO_ID, start = 10, stop = nchar(GEO_ID)))
+
+acsd_zip
 ```
+```{r zip_code}
+#change the column
+library(dplyr)
+acsd_zip <- acsd %>%
+  mutate(zip_id = substr(GEO_ID, start = 10, stop = nchar(GEO_ID)))
+acsd_zip
+
+#add zip column into the acsd table
+new_acsd <- merge(ZIP_TRACT, acsd_zip, by.x = "tract", by.y = "zip_id")
+new_acsd
+
+block_data <- merge(nyc_benchmarking_disclosure_data_reported_in_2016, new_acsd, by.x = "Zip Code", by.y = "zip")
+block_data
+```
+
 
 ## Including Plots
 
