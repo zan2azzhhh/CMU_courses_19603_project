@@ -41,7 +41,7 @@ library("tidyverse")
 
 ```{r}
 # load benchmarking table
-BR <- read.csv(file = paste0(getwd(),"/dataset/NYCBuildingEnergyUse/nyc_benchmarking_disclosure_data_reported_in_2016.csv"),
+BR <- read.csv(file = paste0(getwd(),"/dataset/NYC_Building_Energy_with_GEOID/table.csv"),
                  header=TRUE)
 
 BR
