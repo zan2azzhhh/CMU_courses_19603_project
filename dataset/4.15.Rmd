@@ -47,6 +47,7 @@ acsd_zip
 new_acsd <- merge(ZIP_TRACT, acsd_zip, by.x = "tract", by.y = "zip_id")
 new_acsd
 
+#combine the block data and census data together so that we can compare for example the relation between income and consumption
 block_data <- merge(nyc_benchmarking_disclosure_data_reported_in_2016, new_acsd, by.x = "Zip Code", by.y = "zip")
 block_data
 ```
