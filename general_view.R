@@ -23,7 +23,6 @@ my_data <- raw_data %>%
          WI = Municipally_Supplied_Potable_Water_Indoor_Intensity_gal_per_sqft)
 
 # Fit in linear model with different X variables
-model <- lm(EUI ~ EI, data = my_data)
 # Create a scatterplot with regression line
 ggplot(data = my_data, aes(x = EI, y = EUI)) + 
   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
