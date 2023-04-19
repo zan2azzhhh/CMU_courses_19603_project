@@ -16,9 +16,7 @@ opts_chunk$set(echo = FALSE,
                out.width = "75%", 
                fig.align = "center")
 ```
-
-**Due to unexpected time we spent in finding detailed dataset of energy consumption in selected cities and proper shapefiles for conducting spatial join operations, we did not make it to fit the first model in time. However, since we've successfully found proper dataset and conducted initial transform operations and I will join the office hour next week in person and share the progress we made. We tried our best and are stressed out right now. I hope you can grade us based on the progress that we will share with you on Monday. Really hope you understand**
-
+## Updated Research Question
 
 ## Updated Data Sources
 Our GitHub Repo for data and code: <https://github.com/Ritsuko-xu/19433-2000wattCommunity/>
