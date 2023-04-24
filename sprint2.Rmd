@@ -1,0 +1,248 @@
+---
+title: "nyc-report"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+date: "2023-04-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Section #01: Benchmarking Data Exploration
+
+### Data source for this section
+- 2016 LL33 Data Disclosure for CY2015 reporting, Government of New York City. <https://www.nyc.gov/site/buildings/codes/benchmarking.page>
+
+The purpose of this section is to understand the dataset that we are going to use as the input of building energy consumption intensity - 2015 building energy consumption benchmarking data collected under NYC Local Law 84/133 Energy Benchmarking, which requires owners and managers of buildings larger than 50,000 square (25,000 after 2016) to report their building’s energy usage to the City of New York on a yearly basis. 
+
+The column representing the energy consumption intensity is Site_EUI, and there are many factors impacting this value, like Water, ELectricity, building age
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+# Load raw data
+file_path <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "dataset/NYCBuildingEnergyUse/nyc_benchmarking_disclosure_data_reported_in_2016.csv")
+raw_data <- read_csv(file_path)
+
+# Understanding the raw-dataset
+head(raw_data)  # view the first few rows of the dataset
+summary(raw_data)  # get summary statistics for each column
+str(raw_data)  # get information about the structure of the dataset
+
+# Check for missing values in each column
+library(dplyr)
+raw_data %>%
+  summarize_all(funs(sum(is.na(.))))
+```
+there are lot of missing value, find a methonds 
+
+
+```{r}
+# 1. Removing missing values: 
+# data_clean <- na.omit(data)
+
+#2.use mean imputation to replace missing values with the mean of non-missing values:
+#library(missForest)
+#data_imputed <- missForest(data)$ximp
+
+#3.Using prediction models:
+#library(mice)
+#data_imputed <- mice(data, method = "pmm", m = 5, maxit = 50)
+#This code uses the mice() function to perform multiple imputation using predictive mean matching (method = "pmm") with 5 imputations (m = 5) and a maximum of 50 iterations (maxit = 50).
+```
+
+
+
+```{r}
+# Pre-processing
+my_data <- raw_data %>%
+  filter(DOF_Benchmarking_Submission_Status == "In Compliance") %>% # filter valid Benchmarking Submission Status
+  select(Record_Number, 
+         Site_EUI_kBtu_per_sqft,
+         Weather_Normalized_Site_Electricity_Intensity_kWh_per_sqft,
+         Weather_Normalized_Site_Natural_Gas_Intensity_therms_per_sqft,
+         Total_GHG_Emissions_Metric_Tons_CO2e, # use net value 
+         Direct_GHG_Emissions_Metric_Tons_CO2e, # new
+         Indirect_GHG_Emissions_Metric_Tons_CO2e, # new
+         Municipally_Supplied_Potable_Water_Indoor_Intensity_gal_per_sqft,
+# new added
+         Year_Built,
+         ENERGY_STAR_Score,
+         Property_GFA_Self_reported_sqft
+         ) %>%
+  
+  # change totoal value to net value
+  
+#my_data <- my_data %>%
+  #mutate(Total_GHG_Emissions_Metric_Tons_CO2e_per_sqft = Total_GHG_Emissions_Metric_Tons_CO2e / Property_GFA_Self_reported_sqft)
+  #mutate
+  #mutate
+
+na.omit() %>% # quit properties with missing values
+  
+  
+  rename(Record = Record_Number, # rename as the column names are too long
+         EUI = Site_EUI_kBtu_per_sqft,
+         EI = Weather_Normalized_Site_Electricity_Intensity_kWh_per_sqft,
+         NGI = Weather_Normalized_Site_Natural_Gas_Intensity_therms_per_sqft,
+         GHG = Total_GHG_Emissions_Metric_Tons_CO2e, 
+         WI = Municipally_Supplied_Potable_Water_Indoor_Intensity_gal_per_sqft,
+         ES = ENERGY_STAR_Score, # new
+         YB = Year_Built,# new
+         # add sqrt-GHG
+         )
+
+
+```
+
+
+The R-squared value ranges from 0 to 1, with higher values indicating a better fit between the model and the data.
+
+```{r}
+# Fit in linear model with different X variables
+
+model_EI <- lm(EUI ~ EI, data = my_data)
+summary(model_EI)$r.squared
+
+model_NGI <- lm(EUI ~ NGI, data = my_data)
+summary(model_NGI)$r.squared
+
+# change ghg to net value
+model_GHG <- lm(EUI ~ GHG, data = my_data)
+summary(model_GHG)$r.squared
+
+model_WI <- lm(EUI ~ WI, data = my_data)
+summary(model_WI)$r.squared
+
+model_ES <- lm(EUI ~ ES, data = my_data)
+summary(model_ES)$r.squared
+
+model_YB <- lm(EUI ~ YB, data = my_data)
+summary(model_YB)$r.squared
+```
+why wi over 1 ?
+
+```{r}
+# Fit in linear model with different X variables use log-y
+
+model_EI <- lm(log(EUI) ~ EI, data = my_data)
+summary(model_EI)$r.squared
+
+model_NGI <- lm(log(EUI) ~ NGI, data = my_data)
+summary(model_NGI)$r.squared
+
+# change ghg to net value
+model_GHG <- lm(log(EUI) ~ GHG, data = my_data)
+summary(model_GHG)$r.squared
+
+model_WI <- lm(log(EUI)~ WI, data = my_data)
+summary(model_WI)$r.squared
+
+model_ES <- lm(log(EUI)~ ES, data = my_data)
+summary(model_ES)$r.squared
+
+model_YB <- lm(log(EUI)~ YB, data = my_data)
+summary(model_YB)$r.squared
+```
+
+```{r}
+# use OLS with y
+
+model_ols_y <- lm(EUI ~ EI + NGI + GHG , data = my_data)
+summary(model_ols_y)
+
+# use Ols with log-y
+
+model_ols_logy <- lm(log(EUI) ~ EI + NGI + GHG, data = my_data) # ghg net value
+summary(model_ols_logy)
+
+
+```
+
+
+
+```{r}
+# Create a scatterplot with regression line
+ggplot(data = my_data, aes(x = EI, y = EUI)) + 
+  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
+  geom_point(size = 0.7) + 
+  labs(x = "Electricity Intensity(kWh/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs EI") +
+  theme(plot.title = element_text(hjust = 0.5)) # make title in the middle
+ggplot(data = my_data, aes(x = NGI, y = EUI)) + 
+  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
+  geom_point(size = 0.7) + 
+  labs(x = "Natural Gas Intensity(therms/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs NGI") +
+  theme(plot.title = element_text(hjust = 0.5))
+ggplot(data = my_data, aes(x = GHG, y = EUI)) + 
+  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
+  geom_point(size = 0.7) + 
+  labs(x = "Total GHG Emissions(tons)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs GHG") +
+  theme(plot.title = element_text(hjust = 0.5))
+ggplot(data = my_data, aes(x = WI, y = EUI)) + 
+  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
+  geom_point(size = 0.7) + 
+  labs(x = "Water Intensity(gal/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs WI") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+# Section #02: Spatial Join
+The purpose of the spatial join operation is to join the data from American Community Survey(ACS) collected by Census Bureau to the 2015 building energy consumption benchmarking data collected under NYC Local Law 84/133 Energy Benchmarking.
+
+### Data source for spatial join
+- 2016 LL33 Data Disclosure for CY2015 reporting, Government of New York City. <https://www.nyc.gov/site/buildings/codes/benchmarking.page>
+- 2010 Shapefiles of NYC census blocks, United States Census Bureau. <https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html>
+- 2023 Shapefiles of NYC Tax Lot (BBL), NYC Open Data. <https://www.nyc.gov/site/planning/data-maps/open-data.page#pluto>
+
+### Step #01: shapefile importing and visualization
+Import the .shp files to and visualize the polygons in Arcgis Pro
+<center>
+
+![census block boundaries](./images/spatial_join_fig1.png){width=70%}
+
+![tax lot boundaries](./images/spatial_join_fig2.png){width=70%}
+
+![tax lot boundaries zoomed](./images/spatial_join_fig3.png){width=70%}
+
+![overlay](./images/spatial_join_fig4.png){width=70%}
+
+
+</center>
+
+### Step #02: spatial join using Tax Lot data and Census block data
+Spatial join with options:
+- Target features: Tax Lot data
+- Join features: Census block data
+- Join operation: One to one
+- Match option: Within
+- Fields to join: GeoId (the only required feature for joining ACS data)
+
+This generate a new Tax Lot data table with a new column of the Census Block it belongs to. This means we have BBL number and Census Block geoID in each row.
+
+### Step #03: join  building energy data
+Join the geoID data to the building energy dataset using the field of BBL. This results in a new building energy use data table with a new column of Census Block geoID information it belongs to.
+
+
+```{r}
+# load benchmarking table
+BR <- read.csv(file = paste0(file.path(dirname(rstudioapi::getSourceEditorContext()$path)),
+                             "/dataset/NYC_Building_Energy_with_GEOID/table.csv"),
+                 header=TRUE) %>%
+  data.frame()
+
+head(BR)
+
+```
+# Section #03: Next Step - Join ACS dataset to building energy dataset using the BR above
+dfajsdklfjasdlfjlsjfla
+
+## sadfasdf
+
+### dsfd adsf
+
+#### dfdfsdfasdf
+
+dsfasdfsdf
