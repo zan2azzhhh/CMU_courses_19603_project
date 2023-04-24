@@ -1,46 +1,56 @@
 ---
-title: "nyc-report"
-output:
-  html_document:
-    df_print: paged
-  pdf_document: default
-date: "2023-04-15"
+title: "Sprint#02: Ways towards A Net-Zero Society, Take NYC as an Example"
+date: "2023-04-21"
+output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-# Section #01: Benchmarking Data Exploration
+## 1. Research Questions
 
-### Data source for this section
+Nowadays, the issue of environmental protection and energy consumption is becoming increasingly important. A potential solution to create sustainable cities is through the implementation of Net-Zero cities. These cities provide numerous benefits, such as reduced greenhouse gas emissions, enhanced economic development, and improved quality of life. However, achieving this status is a complex task due to challenges like existing infrastructure, resistance to change, lack of funding, regulatory barriers, and technical challenges.
+
+To aid cities with high energy usage, such as New York City, in realizing the Net-Zero vision, we aim to examine the key factors that influence building energy use intensity. Our research will involve developing a basic model by analyzing the relationships between building energy use intensity and resource consumption such as water, electricity, and gas. We will then expand the model by incorporating additional factors like income level, demographic data, and health conditions to build an improved model. By investigating the coefficients of the improved model, we can determine how these factors impact building energy use intensity and provide recommendations based on our findings. We believe that this research will be valuable for achieving sustainable urban development.
+
+## 2. Data Source
 - 2016 LL33 Data Disclosure for CY2015 reporting, Government of New York City. <https://www.nyc.gov/site/buildings/codes/benchmarking.page>
+- 2010 Shapefiles of NYC census blocks, United States Census Bureau. <https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html>
+- 2023 Shapefiles of NYC Tax Lot (BBL), NYC Open Data. <https://www.nyc.gov/site/planning/data-maps/open-data.page#pluto>
 
+
+## 3. Research Procedure #01 Basice Model: Benchmarking Data Exploration
+
+#### 3.1 Load and check benchmarking data
 The purpose of this section is to understand the dataset that we are going to use as the input of building energy consumption intensity - 2015 building energy consumption benchmarking data collected under NYC Local Law 84/133 Energy Benchmarking, which requires owners and managers of buildings larger than 50,000 square (25,000 after 2016) to report their building’s energy usage to the City of New York on a yearly basis. 
 
-The column representing the energy consumption intensity is Site_EUI, and there are many factors impacting this value, like Water, ELectricity, building age
+The column representing the energy consumption intensity is Site_EUI, and there are many factors impacting this value, like Water, electricity, building age, etc...
 
-```{r}
+```{r ,warning=FALSE,  message=FALSE, error=FALSE}
 library(tidyverse)
-library(ggplot2)
 
 # Load raw data
 file_path <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "dataset/NYCBuildingEnergyUse/nyc_benchmarking_disclosure_data_reported_in_2016.csv")
 raw_data <- read_csv(file_path)
-
-# Understanding the raw-dataset
-head(raw_data)  # view the first few rows of the dataset
-summary(raw_data)  # get summary statistics for each column
-str(raw_data)  # get information about the structure of the dataset
-
-# Check for missing values in each column
-library(dplyr)
-raw_data %>%
-  summarize_all(funs(sum(is.na(.))))
 ```
-there are lot of missing value, find a methonds 
-
 
 ```{r}
+# Understanding the raw-dataset
+
+# view the first few rows of the dataset
+head(raw_data)  
+
+# get summary statistics for each column
+# summary(raw_data) 
+
+# get information about the structure of the dataset
+# str(raw_data)  
+
+```
+
+#### 3.2 Process missing values (not completed in this sprint)
+Checking and removing missing values
+```{r}
+# 0. Check for missing values in each column
+# raw_data %>%
+  # summarize_all(funs(sum(is.na(.))))
 # 1. Removing missing values: 
 # data_clean <- na.omit(data)
 
@@ -55,7 +65,8 @@ there are lot of missing value, find a methonds
 ```
 
 
-
+#### 3.3 Rename colums to make better legibility
+Rename columns to increase legibility and convenience
 ```{r}
 # Pre-processing
 my_data <- raw_data %>%
@@ -99,31 +110,40 @@ na.omit() %>% # quit properties with missing values
 ```
 
 
+#### 3.4 Building linear models of EUI and basic factors like electricity usage, water usage, etc.
 The R-squared value ranges from 0 to 1, with higher values indicating a better fit between the model and the data.
 
 ```{r}
 # Fit in linear model with different X variables
 
+# electricity
 model_EI <- lm(EUI ~ EI, data = my_data)
 summary(model_EI)$r.squared
 
+# natural gas
 model_NGI <- lm(EUI ~ NGI, data = my_data)
 summary(model_NGI)$r.squared
 
 # change ghg to net value
+# green house gas
 model_GHG <- lm(EUI ~ GHG, data = my_data)
 summary(model_GHG)$r.squared
 
+# water
 model_WI <- lm(EUI ~ WI, data = my_data)
 summary(model_WI)$r.squared
 
+# energy start
 model_ES <- lm(EUI ~ ES, data = my_data)
 summary(model_ES)$r.squared
 
+# building age
 model_YB <- lm(EUI ~ YB, data = my_data)
 summary(model_YB)$r.squared
 ```
-why wi over 1 ?
+
+#### 3.5 Building linear models of Log(EUI) and basic factors to reduce impact of outliers
+Modeling with basic single factors
 
 ```{r}
 # Fit in linear model with different X variables use log-y
@@ -148,6 +168,9 @@ model_YB <- lm(log(EUI)~ YB, data = my_data)
 summary(model_YB)$r.squared
 ```
 
+#### 3.6 Build OLS models
+Modeling with multiple variables
+
 ```{r}
 # use OLS with y
 
@@ -163,8 +186,10 @@ summary(model_ols_logy)
 ```
 
 
+#### 3.7 Some visualizations
+Plots for basic factors modeling
 
-```{r}
+```{r, warning=FALSE,  error=FALSE, message=FALSE}
 # Create a scatterplot with regression line
 ggplot(data = my_data, aes(x = EI, y = EUI)) + 
   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
@@ -189,15 +214,13 @@ ggplot(data = my_data, aes(x = WI, y = EUI)) +
 
 ```
 
-# Section #02: Spatial Join
+## 4. Research Procedure #02 Improved Model: Joining Census data (Spatial join completed, waiting for joining census data)
+
+#### 4.1: Spatial Join
 The purpose of the spatial join operation is to join the data from American Community Survey(ACS) collected by Census Bureau to the 2015 building energy consumption benchmarking data collected under NYC Local Law 84/133 Energy Benchmarking.
 
-### Data source for spatial join
-- 2016 LL33 Data Disclosure for CY2015 reporting, Government of New York City. <https://www.nyc.gov/site/buildings/codes/benchmarking.page>
-- 2010 Shapefiles of NYC census blocks, United States Census Bureau. <https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html>
-- 2023 Shapefiles of NYC Tax Lot (BBL), NYC Open Data. <https://www.nyc.gov/site/planning/data-maps/open-data.page#pluto>
-
-### Step #01: shapefile importing and visualization
+**4.1.1 shapefile importing and visualization**
+<br>
 Import the .shp files to and visualize the polygons in Arcgis Pro
 <center>
 
@@ -212,7 +235,8 @@ Import the .shp files to and visualize the polygons in Arcgis Pro
 
 </center>
 
-### Step #02: spatial join using Tax Lot data and Census block data
+**4.1.2 spatial join using Tax Lot data and Census block data**
+<br>
 Spatial join with options:
 - Target features: Tax Lot data
 - Join features: Census block data
@@ -222,7 +246,8 @@ Spatial join with options:
 
 This generate a new Tax Lot data table with a new column of the Census Block it belongs to. This means we have BBL number and Census Block geoID in each row.
 
-### Step #03: join  building energy data
+**4.1.3 join  building energy data**
+<br>
 Join the geoID data to the building energy dataset using the field of BBL. This results in a new building energy use data table with a new column of Census Block geoID information it belongs to.
 
 
@@ -236,13 +261,11 @@ BR <- read.csv(file = paste0(file.path(dirname(rstudioapi::getSourceEditorContex
 head(BR)
 
 ```
-# Section #03: Next Step - Join ACS dataset to building energy dataset using the BR above
-dfajsdklfjasdlfjlsjfla
+#### 4.2 Join ACS dataset to building energy dataset using the BR above (Next Step)
 
-## sadfasdf
+## 5. Research Procedure #03 Intepret Coefficients: Exploring  the coefficients of the improved model (Next Step)
 
-### dsfd adsf
+## 6. Research Procedure #04 Validate Model: Use the model to predict building energy use intensity of benchmarking data collected in 2017 and check the accuracy (Next Step)
 
-#### dfdfsdfasdf
+## 7. Conclusion and Suggestions (Next Step)
 
-dsfasdfsdf
