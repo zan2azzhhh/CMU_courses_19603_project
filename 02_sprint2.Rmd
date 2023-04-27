@@ -182,118 +182,126 @@ summary(model_ols_logy)
 Plots for basic factors modeling
 
 ```{r, warning=FALSE,  error=FALSE, message=FALSE}
-library(gridExtra)
+# Select top 6 property type composed of all properties
 new_data <- my_data %>%
-  filter((TYPE == "Office" |
+  filter(TYPE == "Multifamily Housing" |
+         TYPE == "Office" |
          TYPE == "Hotel" |
          TYPE == "Senior Care Community" |
          TYPE == "Non-Refrigerated Warehouse" |
-         TYPE == "Residence Hall/Dormitory") & EI < 15000 # filter out obvious outlier
+         TYPE == "Residence Hall/Dormitory"
          )
 
 # EUI vs EI
+new_data1 <- new_data %>%
+  filter(TYPE == "Multifamily Housing" & EI < 1500) # filter out 4 obvious outlier
+new_data2 <- new_data %>%
+  filter(TYPE != "Multifamily Housing" & EI < 15000) # filter out 2 obvious outlier
 # y ~ x  
-lm1.ei <- lm(EUI ~ EI * TYPE, data = new_data)
+lm1.ei <- lm(EUI ~ EI * TYPE, data = new_data2)
 summary(lm1.ei)
-newdata1.ei <- new_data %>%
+newdata1.ei <- new_data2 %>%
   data_grid(TYPE, EI, EUI) %>%
   add_predictions(lm1.ei) %>%
   add_residuals(lm1.ei)
-ggplot(data = new_data) +
+ggplot(data = new_data2) +
   geom_point(aes(x = EI, y = EUI, color = TYPE), size = 0.7) +
   geom_line(data = newdata1.ei, aes(x = EI, y = pred, color = TYPE)) +
   labs(x = "Electricity Intensity(kWh/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs EI") +
   theme(plot.title = element_text(hjust = 0.5)) # make title in the middle
 # log(y) ~ x
-lm2.ei <- lm(log(EUI) ~ EI * TYPE, data = new_data)
+lm2.ei <- lm(log(EUI) ~ EI * TYPE, data = new_data2)
 summary(lm2.ei)
-newdata2.ei <- new_data %>%
+newdata2.ei <- new_data2 %>%
   data_grid(TYPE, EI, EUI) %>%
   add_predictions(lm2.ei) %>%
   add_residuals(lm2.ei)
-ggplot(data = new_data) +
+ggplot(data = new_data2) +
   geom_point(aes(x = EI, y = log(EUI), color = TYPE), size = 0.7) +
   geom_line(data = newdata2.ei, aes(x = EI, y = pred, color = TYPE)) +
   labs(x = "Electricity Intensity(kWh/sqft)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs EI") +
   theme(plot.title = element_text(hjust = 0.5))
+# We analyze on multifamily housing properties separately.
+# y ~ x  
+lm1.ei.special <- lm(EUI ~ EI, data = new_data1)
+summary(lm1.ei.special)
+newdata1.ei.special <- new_data1 %>%
+  data_grid(TYPE, EI, EUI) %>%
+  add_predictions(lm1.ei.special) %>%
+  add_residuals(lm1.ei.special)
+ggplot(data = new_data1) +
+  geom_point(aes(x = EI, y = EUI), size = 0.7) +
+  geom_line(data = newdata1.ei.special, aes(x = EI, y = pred), color = "blue") +
+  labs(x = "Electricity Intensity(kWh/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs EI") +
+  theme(plot.title = element_text(hjust = 0.5)) # make title in the middle
+# log(y) ~ x
+lm2.ei.special <- lm(log(EUI) ~ EI, data = new_data1)
+summary(lm2.ei.special)
+newdata2.ei.special <- new_data1 %>%
+  data_grid(TYPE, EI, EUI) %>%
+  add_predictions(lm2.ei.special) %>%
+  add_residuals(lm2.ei.special)
+ggplot(data = new_data1) +
+  geom_point(aes(x = EI, y = log(EUI)), size = 0.7) +
+  geom_line(data = newdata2.ei.special, aes(x = EI, y = pred), color = "blue") +
+  labs(x = "Electricity Intensity(kWh/sqft)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs EI") +
+  theme(plot.title = element_text(hjust = 0.5))
 
 # EUI vs NGI
+new_data3 <- new_data %>%
+  filter(NGI < 400) # filter out 2 obvious outlier
 # y ~ x  
-lm1.ngi <- lm(EUI ~ NGI * TYPE, data = new_data)
+lm1.ngi <- lm(EUI ~ NGI * TYPE, data = new_data3)
 summary(lm1.ngi)
-newdata1.ngi <- new_data %>%
+newdata1.ngi <- new_data3 %>%
   data_grid(TYPE, NGI, EUI) %>%
   add_predictions(lm1.ngi) %>%
   add_residuals(lm1.ngi)
-ggplot(data = new_data) +
+ggplot(data = new_data3) +
   geom_point(aes(x = NGI, y = EUI, color = TYPE), size = 0.7) +
   geom_line(data = newdata1.ngi, aes(x = NGI, y = pred, color = TYPE)) +
-  labs(x = "Electricity Intensity(kWh/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs NGI") +
+  labs(x = "Natural Gas Intensity(therms/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs NGI") +
   theme(plot.title = element_text(hjust = 0.5)) # make title in the middle
 # log(y) ~ x
-lm2.ngi <- lm(log(EUI) ~ NGI * TYPE, data = new_data)
+lm2.ngi <- lm(log(EUI) ~ NGI * TYPE, data = new_data3)
 summary(lm2.ngi)
-newdata2.ngi <- new_data %>%
+newdata2.ngi <- new_data3 %>%
   data_grid(TYPE, NGI, EUI) %>%
   add_predictions(lm2.ngi) %>%
   add_residuals(lm2.ngi)
-ggplot(data = new_data) +
+ggplot(data = new_data3) +
   geom_point(aes(x = NGI, y = log(EUI), color = TYPE), size = 0.7) +
   geom_line(data = newdata2.ngi, aes(x = NGI, y = pred, color = TYPE)) +
-  labs(x = "Electricity Intensity(kWh/sqft)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs NGI") +
+  labs(x = "Natural Gas Intensity(therms/sqft)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs NGI") +
   theme(plot.title = element_text(hjust = 0.5))
 
-
-
-# library(gridExtra)
-# # Create a scatterplot with regression line
-# p1.ei <- ggplot(data = my_data, aes(x = EI, y = EUI)) + 
-#   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-#   geom_point(size = 0.7) + 
-#   labs(x = "Electricity Intensity(kWh/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs EI") +
-#   theme(plot.title = element_text(hjust = 0.5)) # make title in the middle
-# p2.ei <- ggplot(data = my_data, aes(x = EI, y = log(EUI))) + 
-#   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-#   geom_point(size = 0.7) + 
-#   labs(x = "Electricity Intensity(kWh/sqft)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs EI") +
-#   theme(plot.title = element_text(hjust = 0.5))
-# grid.arrange(p1.ei, p2.ei, ncol = 2)
-# 
-# p1.ngi <- ggplot(data = my_data, aes(x = NGI, y = EUI)) + 
-#   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-#   geom_point(size = 0.7) + 
-#   labs(x = "Natural Gas Intensity(therms/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs NGI") +
-#   theme(plot.title = element_text(hjust = 0.5))
-# p2.ngi <- ggplot(data = my_data, aes(x = NGI, y = log(EUI))) + 
-#   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-#   geom_point(size = 0.7) + 
-#   labs(x = "Natural Gas Intensity(therms/sqft)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs NGI") +
-#   theme(plot.title = element_text(hjust = 0.5))
-# grid.arrange(p1.ngi, p2.ngi, ncol = 2)
-# 
-# p1.ghg <- ggplot(data = my_data, aes(x = GHG, y = EUI)) + 
-#   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-#   geom_point(size = 0.7) + 
-#   labs(x = "Total GHG Emissions(tons)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs GHG") +
-#   theme(plot.title = element_text(hjust = 0.5))
-# p2.ghg <- ggplot(data = my_data, aes(x = GHG, y = log(EUI))) + 
-#   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-#   geom_point(size = 0.7) + 
-#   labs(x = "Total GHG Emissions(tons)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs GHG") +
-#   theme(plot.title = element_text(hjust = 0.5))
-# grid.arrange(p1.ghg, p2.ghg, ncol = 2)
-# 
-# p1.wi <- ggplot(data = my_data, aes(x = WI, y = EUI)) + 
-#   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-#   geom_point(size = 0.7) + 
-#   labs(x = "Water Intensity(gal/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs WI") +
-#   theme(plot.title = element_text(hjust = 0.5))
-# p2.wi <- ggplot(data = my_data, aes(x = WI, y = log(EUI))) + 
-#   geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-#   geom_point(size = 0.7) + 
-#   labs(x = "Water Intensity(gal/sqft)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs WI") +
-#   theme(plot.title = element_text(hjust = 0.5))
-# grid.arrange(p1.wi, p2.wi, ncol = 2)
+# EUI vs WI
+new_data4 <- new_data %>%
+  filter(WI < 20000) # filter out 2 obvious outlier
+# y ~ x  
+lm1.wi <- lm(EUI ~ WI * TYPE, data = new_data4)
+summary(lm1.wi)
+newdata1.wi <- new_data4 %>%
+  data_grid(TYPE, WI, EUI) %>%
+  add_predictions(lm1.wi) %>%
+  add_residuals(lm1.wi)
+ggplot(data = new_data4) +
+  geom_point(aes(x = WI, y = EUI, color = TYPE), size = 0.7) +
+  geom_line(data = newdata1.wi, aes(x = WI, y = pred, color = TYPE)) +
+  labs(x = "Water Intensity(gal/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs WI") +
+  theme(plot.title = element_text(hjust = 0.5)) # make title in the middle
+# log(y) ~ x
+lm2.wi <- lm(log(EUI) ~ WI * TYPE, data = new_data4)
+summary(lm2.wi)
+newdata2.wi <- new_data4 %>%
+  data_grid(TYPE, WI, EUI) %>%
+  add_predictions(lm2.wi) %>%
+  add_residuals(lm2.wi)
+ggplot(data = new_data4) +
+  geom_point(aes(x = WI, y = log(EUI), color = TYPE), size = 0.7) +
+  geom_line(data = newdata2.wi, aes(x = WI, y = pred, color = TYPE)) +
+  labs(x = "Water Intensity(gal/sqft)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs WI") +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ## 4. Research Procedure #02 Improved Model: Joining Census data (Spatial join completed, waiting for joining census data)
