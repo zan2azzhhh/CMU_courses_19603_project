@@ -101,7 +101,8 @@ na.omit() %>% # quit properties with missing values
          NGI = Weather_Normalized_Site_Natural_Gas_Intensity_therms_per_sqft,
          GHG = Total_GHG_Emissions_Metric_Tons_CO2e, 
          WI = Municipally_Supplied_Potable_Water_Indoor_Intensity_gal_per_sqft,
-         YB = Year_Built # new
+         YB = Year_Built,
+         GFA = Property_GFA_Self_reported_sqft
          # add sqrt-GHG
          )
 
@@ -160,7 +161,28 @@ model_YB <- lm(log(EUI)~ YB, data = my_data)
 summary(model_YB)$r.squared
 ```
 
-#### 3.6 Build OLS models
+#### 3.6 Find numerical correlation
+```{r}
+library(lattice)
+library(reshape2)
+
+# calculate correlation matrix
+cor_matrix <- cor(my_data[,c("EUI", 
+                             "EI", 
+                             "NGI", 
+                             "GHG", 
+                             "WI", 
+                             "GFA")])
+
+corr_mel <- melt(cor_matrix)
+corr_mel
+
+ggplot(data = corr_mel, aes(x=Var1, y=Var2, fill=value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "cadetblue4")
+```
+
+#### 3.7 Build OLS models
 Modeling with multiple variables to check interaction.
 
 ```{r}
@@ -178,7 +200,7 @@ summary(model_ols_logy)
 ```
 
 
-#### 3.7 Some visualizations
+#### 3.8 Some visualizations
 Plots for basic factors modeling
 
 ```{r, warning=FALSE,  error=FALSE, message=FALSE}
