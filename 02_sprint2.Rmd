@@ -182,6 +182,7 @@ summary(model_ols_logy)
 Plots for basic factors modeling
 
 ```{r, warning=FALSE,  error=FALSE, message=FALSE}
+package(modelr)
 # Select top 6 property type composed of all properties
 new_data <- my_data %>%
   filter(TYPE == "Multifamily Housing" |
