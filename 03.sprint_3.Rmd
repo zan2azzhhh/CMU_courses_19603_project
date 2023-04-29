@@ -4,7 +4,7 @@ date: "2023-04-21"
 output: pdf_document
 ---
 ```{r}
-
+Sys.setenv('R_MAX_VSIZE'=32000000000)
 library(tidyverse)
 library(modelr)
 ```
@@ -12,20 +12,22 @@ library(modelr)
 file_path <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "dataset/nyc_eui_census.csv")
 raw_data <- read_csv(file_path)
 eui_bg <- as_tibble(raw_data)
-
+head(eui_bg)
 ```
 ```{r}
 eui_bg_fil <- eui_bg %>%
   filter(Site_EUI__ < 500)
-lm1 <- lm(Site_EUI__ ~ income, data = eui_bg_fil)
+lm1 <- lm(Site_EUI__ ~ income * buildingType, data = eui_bg_fil)
 lm1_data <- eui_bg_fil %>%
-  data_grid(income, Site_EUI__) %>%
+  data_grid(income, Site_EUI__, buildingType) %>%
   add_predictions(lm1) %>%
   add_residuals(lm1)
 lm1_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = income, y = Site_EUI__), size = 0.2) +
-  geom_line(data = lm1_data, aes(x = income, y = pred))
+  geom_point(aes(x = income, y = Site_EUI__, color = buildingType), size = 0.2) +
+  geom_line(data = lm1_data, aes(x = income, y = pred, color = buildingType)) +
+  labs(x = "Income($)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs Income") +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 ```{r}
 eui_bg_fil <- eui_bg %>%
