@@ -3,7 +3,11 @@ title: "Sprint#02: Ways towards A Net-Zero Society, Take NYC as an Example"
 date: "2023-04-21"
 output: pdf_document
 ---
+```{r}
 
+library(tidyverse)
+library(modelr)
+```
 ```{r}
 file_path <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "dataset/nyc_eui_census.csv")
 raw_data <- read_csv(file_path)
