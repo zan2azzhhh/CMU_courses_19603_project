@@ -12,15 +12,14 @@ library(modelr)
 file_path <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "dataset/nyc_eui_census.csv")
 raw_data <- read_csv(file_path)
 eui_bg <- as_tibble(raw_data)  %>%
-  filter ((buildingType == "Multifamily Housing" |
+  filter (Site_EUI__ > 0 & Site_EUI__ < 500 & (buildingType == "Multifamily Housing" |
           buildingType == "Office" |
           buildingType == "Hotel" |
           buildingType == "Senior Care Community" |
           buildingType == "Non-Refrigerated Warehouse" |
-          buildingType == "Residence Hall/Dormitory") & Site_EUI__ > 0 & Site_EUI__ < 500
-         ) %>%
+          buildingType == "Residence Hall/Dormitory")) %>%
   na.omit()
-head(eui_bg)
+eui_bg
 ```
 ```{r}
 library(lattice)
