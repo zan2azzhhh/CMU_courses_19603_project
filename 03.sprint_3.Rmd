@@ -12,21 +12,23 @@ library(modelr)
 file_path <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "dataset/nyc_eui_census.csv")
 raw_data <- read_csv(file_path)
 eui_bg <- as_tibble(raw_data)  %>%
-  filter (Site_EUI__ > 0 & Site_EUI__ < 500 & (buildingType == "Multifamily Housing" |
-          buildingType == "Office" |
-          buildingType == "Hotel" |
-          buildingType == "Senior Care Community" |
-          buildingType == "Non-Refrigerated Warehouse" |
-          buildingType == "Residence Hall/Dormitory")) %>%
+  filter(buildingType == "Multifamily Housing" |
+         buildingType == "Office" |
+         buildingType == "Hotel" |
+         buildingType == "Senior Care Community" |
+         buildingType == "Non-Refrigerated Warehouse" |
+         buildingType == "Residence Hall/Dormitory") %>%
+  filter(WN_EUI > 0) %>%
+  filter(WN_EUI < 500) %>%
   na.omit()
-eui_bg
+sort(eui_bg$WN_EUI, decreasing = TRUE)
 ```
 ```{r}
 library(lattice)
 library(reshape2)
 
 # calculate correlation matrix
-cor_matrix <- cor(eui_bg[,c("Site_EUI__", 
+cor_matrix <- cor(eui_bg[,c("WN_EUI", 
                              "GHG", 
                              "buildingAge",
                              "area",
@@ -48,16 +50,16 @@ corrplot(cor_matrix,method="color")
 ```{r}
 # eui vs income
 eui_bg_fil <- eui_bg %>%
-  select(income, Site_EUI__, buildingType)
+  select(income, WN_EUI, buildingType)
 # y ~ x
-lm1 <- lm(Site_EUI__ ~ income * buildingType, data = eui_bg_fil)
+lm1 <- lm(WN_EUI ~ income * buildingType, data = eui_bg_fil)
 lm1_data <- eui_bg_fil %>%
-  data_grid(income, Site_EUI__, buildingType) %>%
+  data_grid(income, WN_EUI, buildingType) %>%
   add_predictions(lm1) %>%
   add_residuals(lm1)
 lm1_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = income, y = Site_EUI__, color = buildingType), size = 0.2) +
+  geom_point(aes(x = income, y = WN_EUI, color = buildingType), size = 0.2, alpha = 0.4) +
   geom_line(data = lm1_data, aes(x = income, y = pred, color = buildingType)) +
   labs(x = "income", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs income") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -68,14 +70,14 @@ summary(lm1)
 
 ```{r}
 # log(y) ~ x
-lm2 <- lm(log(Site_EUI__) ~ income * buildingType, data = eui_bg_fil)
+lm2 <- lm(log(WN_EUI) ~ income * buildingType, data = eui_bg_fil)
 lm2_data <- eui_bg_fil %>%
-  data_grid(income, Site_EUI__, buildingType) %>%
+  data_grid(income, WN_EUI, buildingType) %>%
   add_predictions(lm2) %>%
   add_residuals(lm2)
 lm2_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = income, y = log(Site_EUI__), color = buildingType), size = 0.2) +
+  geom_point(aes(x = income, y = log(WN_EUI), color = buildingType), size = 0.2, alpha = 0.4) +
   geom_line(data = lm2_data, aes(x = income, y = pred, color = buildingType)) +
   labs(x = "income", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs income") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -86,16 +88,16 @@ ggplot(data = eui_bg_fil) +
 ```{r}
 # eui vs education
 eui_bg_fil <- eui_bg %>%
-  select(higherEduRate, Site_EUI__, buildingType)
+  select(higherEduRate, WN_EUI, buildingType)
 # y ~ x
-lm1 <- lm(Site_EUI__ ~ higherEduRate * buildingType, data = eui_bg_fil)
+lm1 <- lm(WN_EUI ~ higherEduRate * buildingType, data = eui_bg_fil)
 lm1_data <- eui_bg_fil %>%
-  data_grid(higherEduRate, Site_EUI__, buildingType) %>%
+  data_grid(higherEduRate, WN_EUI, buildingType) %>%
   add_predictions(lm1) %>%
   add_residuals(lm1)
 lm1_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = higherEduRate, y = Site_EUI__, color = buildingType), size = 0.2) +
+  geom_point(aes(x = higherEduRate, y = WN_EUI, color = buildingType), size = 0.2) +
   geom_line(data = lm1_data, aes(x = higherEduRate, y = pred, color = buildingType)) +
   labs(x = "higher Eduation Rate", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs higherEduRate") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -106,14 +108,14 @@ summary(lm1)
 
 ```{r}
 # log(y) ~ x
-lm2 <- lm(log(Site_EUI__) ~ higherEduRate * buildingType, data = eui_bg_fil)
+lm2 <- lm(log(WN_EUI) ~ higherEduRate * buildingType, data = eui_bg_fil)
 lm2_data <- eui_bg_fil %>%
-  data_grid(higherEduRate, Site_EUI__, buildingType) %>%
+  data_grid(higherEduRate, WN_EUI, buildingType) %>%
   add_predictions(lm2) %>%
   add_residuals(lm2)
 lm2_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = higherEduRate, y = log(Site_EUI__), color = buildingType), size = 0.2) +
+  geom_point(aes(x = higherEduRate, y = log(WN_EUI), color = buildingType), size = 0.2) +
   geom_line(data = lm2_data, aes(x = higherEduRate, y = pred, color = buildingType)) +
   labs(x = "higher Eduation Rate", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs higherEduRate") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -123,16 +125,16 @@ ggplot(data = eui_bg_fil) +
 ```{r}
 # eui vs marriage rate
 eui_bg_fil <- eui_bg %>%
-  select(marriageRate, Site_EUI__, buildingType)
+  select(marriageRate, WN_EUI, buildingType)
 # y ~ x
-lm1 <- lm(Site_EUI__ ~ marriageRate * buildingType, data = eui_bg_fil)
+lm1 <- lm(WN_EUI ~ marriageRate * buildingType, data = eui_bg_fil)
 lm1_data <- eui_bg_fil %>%
-  data_grid(marriageRate, Site_EUI__, buildingType) %>%
+  data_grid(marriageRate, WN_EUI, buildingType) %>%
   add_predictions(lm1) %>%
   add_residuals(lm1)
 lm1_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = marriageRate, y = Site_EUI__, color = buildingType), size = 0.2) +
+  geom_point(aes(x = marriageRate, y = WN_EUI, color = buildingType), size = 0.2) +
   geom_line(data = lm1_data, aes(x = marriageRate, y = pred, color = buildingType)) +
   labs(x = "marriage Rate(%)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs marriageRate") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -143,14 +145,14 @@ summary(lm1)
 
 ```{r}
 # log(y) ~ x
-lm2 <- lm(log(Site_EUI__) ~ marriageRate * buildingType, data = eui_bg_fil)
+lm2 <- lm(log(WN_EUI) ~ marriageRate * buildingType, data = eui_bg_fil)
 lm2_data <- eui_bg_fil %>%
-  data_grid(marriageRate, Site_EUI__, buildingType) %>%
+  data_grid(marriageRate, WN_EUI, buildingType) %>%
   add_predictions(lm2) %>%
   add_residuals(lm2)
 lm2_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = marriageRate, y = log(Site_EUI__), color = buildingType), size = 0.2) +
+  geom_point(aes(x = marriageRate, y = log(WN_EUI), color = buildingType), size = 0.2) +
   geom_line(data = lm2_data, aes(x = marriageRate, y = pred, color = buildingType)) +
   labs(x = "marriage Rate(%)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs marriageRate") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -163,16 +165,16 @@ summary(lm1)
 ```{r}
 # eui vs commute time
 eui_bg_fil <- eui_bg %>%
-  select(commuteTime, Site_EUI__, buildingType)
+  select(commuteTime, WN_EUI, buildingType)
 # y ~ x
-lm1 <- lm(Site_EUI__ ~ commuteTime * buildingType, data = eui_bg_fil)
+lm1 <- lm(WN_EUI ~ commuteTime * buildingType, data = eui_bg_fil)
 lm1_data <- eui_bg_fil %>%
-  data_grid(commuteTime, Site_EUI__, buildingType) %>%
+  data_grid(commuteTime, WN_EUI, buildingType) %>%
   add_predictions(lm1) %>%
   add_residuals(lm1)
 lm1_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = commuteTime, y = Site_EUI__, color = buildingType), size = 0.2) +
+  geom_point(aes(x = commuteTime, y = WN_EUI, color = buildingType), size = 0.2) +
   geom_line(data = lm1_data, aes(x = commuteTime, y = pred, color = buildingType)) +
   labs(x = "commute Time(min)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs commuteTime") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -183,14 +185,14 @@ summary(lm1)
 
 ```{r}
 # log(y) ~ x
-lm2 <- lm(log(Site_EUI__) ~ commuteTime * buildingType, data = eui_bg_fil)
+lm2 <- lm(log(WN_EUI) ~ commuteTime * buildingType, data = eui_bg_fil)
 lm2_data <- eui_bg_fil %>%
-  data_grid(commuteTime, Site_EUI__, buildingType) %>%
+  data_grid(commuteTime, WN_EUI, buildingType) %>%
   add_predictions(lm2) %>%
   add_residuals(lm2)
 lm2_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = commuteTime, y = log(Site_EUI__), color = buildingType), size = 0.2) +
+  geom_point(aes(x = commuteTime, y = log(WN_EUI), color = buildingType), size = 0.2) +
   geom_line(data = lm2_data, aes(x = commuteTime, y = pred, color = buildingType)) +
   labs(x = "commute Time(min)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs commuteTime") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -199,16 +201,16 @@ ggplot(data = eui_bg_fil) +
 ```{r}
 # eui vs live alone rate
 eui_bg_fil <- eui_bg %>%
-  select(liveAloneRate, Site_EUI__, buildingType)
+  select(liveAloneRate, WN_EUI, buildingType)
 # y ~ x
-lm1 <- lm(Site_EUI__ ~ liveAloneRate * buildingType, data = eui_bg_fil)
+lm1 <- lm(WN_EUI ~ liveAloneRate * buildingType, data = eui_bg_fil)
 lm1_data <- eui_bg_fil %>%
-  data_grid(liveAloneRate, Site_EUI__, buildingType) %>%
+  data_grid(liveAloneRate, WN_EUI, buildingType) %>%
   add_predictions(lm1) %>%
   add_residuals(lm1)
 lm1_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = liveAloneRate, y = Site_EUI__, color = buildingType), size = 0.2) +
+  geom_point(aes(x = liveAloneRate, y = WN_EUI, color = buildingType), size = 0.2) +
   geom_line(data = lm1_data, aes(x = liveAloneRate, y = pred, color = buildingType)) +
   labs(x = "live Alone Rate(%)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs liveAloneRate") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -219,14 +221,14 @@ summary(lm1)
 
 ```{r}
 # log(y) ~ x
-lm2 <- lm(log(Site_EUI__) ~ liveAloneRate * buildingType, data = eui_bg_fil)
+lm2 <- lm(log(WN_EUI) ~ liveAloneRate * buildingType, data = eui_bg_fil)
 lm2_data <- eui_bg_fil %>%
-  data_grid(liveAloneRate, Site_EUI__, buildingType) %>%
+  data_grid(liveAloneRate, WN_EUI, buildingType) %>%
   add_predictions(lm2) %>%
   add_residuals(lm2)
 lm2_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = liveAloneRate, y = log(Site_EUI__), color = buildingType), size = 0.2) +
+  geom_point(aes(x = liveAloneRate, y = log(WN_EUI), color = buildingType), size = 0.2) +
   geom_line(data = lm2_data, aes(x = liveAloneRate, y = pred, color = buildingType)) +
   labs(x = "liveAloneRate(%)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs liveAloneRate") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -235,16 +237,16 @@ ggplot(data = eui_bg_fil) +
 ```{r}
 # eui vs male rate
 eui_bg_fil <- eui_bg %>%
-  select(maleRate, Site_EUI__, buildingType)
+  select(maleRate, WN_EUI, buildingType)
 # y ~ x
-lm1 <- lm(Site_EUI__ ~ maleRate * buildingType, data = eui_bg_fil)
+lm1 <- lm(WN_EUI ~ maleRate * buildingType, data = eui_bg_fil)
 lm1_data <- eui_bg_fil %>%
-  data_grid(maleRate, Site_EUI__, buildingType) %>%
+  data_grid(maleRate, WN_EUI, buildingType) %>%
   add_predictions(lm1) %>%
   add_residuals(lm1)
 lm1_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = maleRate, y = Site_EUI__, color = buildingType), size = 0.2) +
+  geom_point(aes(x = maleRate, y = WN_EUI, color = buildingType), size = 0.2) +
   geom_line(data = lm1_data, aes(x = maleRate, y = pred, color = buildingType)) +
   labs(x = "male Rate(%)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs maleRate") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -255,14 +257,14 @@ summary(lm1)
 
 ```{r}
 # log(y) ~ x
-lm2 <- lm(log(Site_EUI__) ~ maleRate * buildingType, data = eui_bg_fil)
+lm2 <- lm(log(WN_EUI) ~ maleRate * buildingType, data = eui_bg_fil)
 lm2_data <- eui_bg_fil %>%
-  data_grid(maleRate, Site_EUI__, buildingType) %>%
+  data_grid(maleRate, WN_EUI, buildingType) %>%
   add_predictions(lm2) %>%
   add_residuals(lm2)
 lm2_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = maleRate, y = log(Site_EUI__), color = buildingType), size = 0.2) +
+  geom_point(aes(x = maleRate, y = log(WN_EUI), color = buildingType), size = 0.2) +
   geom_line(data = lm2_data, aes(x = maleRate, y = pred, color = buildingType)) +
   labs(x = "male Rate(%)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs maleRate") +
   theme(plot.title = element_text(hjust = 0.5))
@@ -271,20 +273,19 @@ ggplot(data = eui_bg_fil) +
 ```{r}
 # eui vs avgAge
 eui_bg_fil <- eui_bg %>%
-  select(avgAge, Site_EUI__, buildingType)
+  select(avgAge, WN_EUI, buildingType)
 # y ~ x
-lm1 <- lm(Site_EUI__ ~ avgAge * buildingType, data = eui_bg_fil)
+lm1 <- lm(WN_EUI ~ avgAge * buildingType, data = eui_bg_fil)
 lm1_data <- eui_bg_fil %>%
-  data_grid(avgAge, Site_EUI__, buildingType) %>%
+  data_grid(avgAge, WN_EUI, buildingType) %>%
   add_predictions(lm1) %>%
   add_residuals(lm1)
 lm1_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = avgAge, y = Site_EUI__, color = buildingType), size = 0.2) +
+  geom_point(aes(x = avgAge, y = WN_EUI, color = buildingType), size = 0.2) +
   geom_line(data = lm1_data, aes(x = avgAge, y = pred, color = buildingType)) +
   labs(x = "average Age", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs avgAge") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  ylim(0,10)
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
 ```{r}
@@ -293,14 +294,14 @@ summary(lm1)
 
 ```{r}
 # log(y) ~ x
-lm2 <- lm(log(Site_EUI__) ~ avgAge * buildingType, data = eui_bg_fil)
+lm2 <- lm(log(WN_EUI) ~ avgAge * buildingType, data = eui_bg_fil)
 lm2_data <- eui_bg_fil %>%
-  data_grid(avgAge, Site_EUI__, buildingType) %>%
+  data_grid(avgAge, WN_EUI, buildingType) %>%
   add_predictions(lm2) %>%
   add_residuals(lm2)
 lm2_data
 ggplot(data = eui_bg_fil) +
-  geom_point(aes(x = avgAge, y = log(Site_EUI__), color = buildingType), size = 0.2) +
+  geom_point(aes(x = avgAge, y = log(WN_EUI), color = buildingType), size = 0.2) +
   geom_line(data = lm2_data, aes(x = avgAge, y = pred, color = buildingType)) +
   labs(x = "average Age", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs avgAge") +
   theme(plot.title = element_text(hjust = 0.5))
