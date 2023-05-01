@@ -62,6 +62,9 @@ ggplot(data = eui_bg_fil) +
   labs(x = "income", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs income") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+```{r}
+summary(lm1)
+```
 
 ```{r}
 # log(y) ~ x
@@ -97,6 +100,9 @@ ggplot(data = eui_bg_fil) +
   labs(x = "higher Eduation Rate", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs higherEduRate") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+```{r}
+summary(lm1)
+```
 
 ```{r}
 # log(y) ~ x
@@ -131,6 +137,9 @@ ggplot(data = eui_bg_fil) +
   labs(x = "marriage Rate(%)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs marriageRate") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+```{r}
+summary(lm1)
+```
 
 ```{r}
 # log(y) ~ x
@@ -145,6 +154,9 @@ ggplot(data = eui_bg_fil) +
   geom_line(data = lm2_data, aes(x = marriageRate, y = pred, color = buildingType)) +
   labs(x = "marriage Rate(%)", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs marriageRate") +
   theme(plot.title = element_text(hjust = 0.5))
+```
+```{r}
+summary(lm1)
 ```
 
 
@@ -164,6 +176,9 @@ ggplot(data = eui_bg_fil) +
   geom_line(data = lm1_data, aes(x = commuteTime, y = pred, color = buildingType)) +
   labs(x = "commute Time(min)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs commuteTime") +
   theme(plot.title = element_text(hjust = 0.5))
+```
+```{r}
+summary(lm1)
 ```
 
 ```{r}
@@ -198,6 +213,9 @@ ggplot(data = eui_bg_fil) +
   labs(x = "live Alone Rate(%)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs liveAloneRate") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+```{r}
+summary(lm1)
+```
 
 ```{r}
 # log(y) ~ x
@@ -231,6 +249,9 @@ ggplot(data = eui_bg_fil) +
   labs(x = "male Rate(%)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs maleRate") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+```{r}
+summary(lm1)
+```
 
 ```{r}
 # log(y) ~ x
@@ -262,7 +283,12 @@ ggplot(data = eui_bg_fil) +
   geom_point(aes(x = avgAge, y = Site_EUI__, color = buildingType), size = 0.2) +
   geom_line(data = lm1_data, aes(x = avgAge, y = pred, color = buildingType)) +
   labs(x = "average Age", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs avgAge") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylim(0,10)
+
+```
+```{r}
+summary(lm1)
 ```
 
 ```{r}
@@ -278,4 +304,16 @@ ggplot(data = eui_bg_fil) +
   geom_line(data = lm2_data, aes(x = avgAge, y = pred, color = buildingType)) +
   labs(x = "average Age", y = "log(EUI)(kBtu/sqft)", title = "Linear Regression of log(EUI) vs avgAge") +
   theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+lm <- lm(Site_EUI__ ~ higherEduRate * commuteTime * area * buildingAge * avgAge * liveAloneRate , data = eui_bg)
+summary(lm)
+```
+```{R}
+library(randomForest)
+set.seed(42)
+rf <- eui_bg %>%
+  RandomForest(Site_EUI__ ~ income * commuteTime * area * buildingAge * avgAge, ntree=10, mtry=1)
+summary(rf)
 ```
