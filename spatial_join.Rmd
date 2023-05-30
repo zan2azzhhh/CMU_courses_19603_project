@@ -1,5 +1,5 @@
 ---
-title: "sprint_1"
+title: "Intro to Spatial Join"
 output:
   pdf_document: default
   html_document:
@@ -43,30 +43,6 @@ my_data <- raw_data %>%
          NGI = Weather_Normalized_Site_Natural_Gas_Intensity_therms_per_sqft,
          GHG = Total_GHG_Emissions_Metric_Tons_CO2e, 
          WI = Municipally_Supplied_Potable_Water_Indoor_Intensity_gal_per_sqft)
-
-# Fit in linear model with different X variables
-# Create a scatterplot with regression line
-ggplot(data = my_data, aes(x = EI, y = EUI)) + 
-  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-  geom_point(size = 0.7) + 
-  labs(x = "Electricity Intensity(kWh/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs EI") +
-  theme(plot.title = element_text(hjust = 0.5)) # make title in the middle
-ggplot(data = my_data, aes(x = NGI, y = EUI)) + 
-  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-  geom_point(size = 0.7) + 
-  labs(x = "Natural Gas Intensity(therms/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs NGI") +
-  theme(plot.title = element_text(hjust = 0.5))
-ggplot(data = my_data, aes(x = GHG, y = EUI)) + 
-  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-  geom_point(size = 0.7) + 
-  labs(x = "Total GHG Emissions(tons)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs GHG") +
-  theme(plot.title = element_text(hjust = 0.5))
-ggplot(data = my_data, aes(x = WI, y = EUI)) + 
-  geom_smooth(method = "lm", se = FALSE, color = "lightblue") +
-  geom_point(size = 0.7) + 
-  labs(x = "Water Intensity(gal/sqft)", y = "EUI(kBtu/sqft)", title = "Linear Regression of EUI vs WI") +
-  theme(plot.title = element_text(hjust = 0.5))
-
 ```
 
 # Section #02: Spatial Join
