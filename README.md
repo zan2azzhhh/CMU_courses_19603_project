@@ -14,4 +14,5 @@ To learn all about our project, please refer to Report.pdf.
 - data_exploration_preprocess.R: Code to do data preprocess and exploratory analysis of the datasets.
 - spaitial_join.pdf: General, simple introduction to spatial join.
 - spatial_join.Rmd: Original Rmd file to write `spatial_join.pdf`. It is knitted to a `pdf` file.
+- model.R: Code to combine building energy use and census data and fit in models for analysis.
 - README.md
